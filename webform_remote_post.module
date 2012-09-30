@@ -1,0 +1,102 @@
+<?php
+
+/**
+ * Implements hook_help.
+ *
+ * Displays help and module information.
+ *
+ * @param path 
+ *   Which path of the site we're using to display help
+ * @param arg 
+ *   Array that holds the current path as returned from arg() function
+ */
+function webform_remote_post_help($path, $arg) {
+  switch ($path) {
+    case "admin/help#webform_remote_post":
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Coming soon') . '</p>';
+      $output .= '<h3>' . t('Use Cases') . '</h3>';
+      $output .= '<p>' . t('more...') . '</p>';
+      break;
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function webform_remote_post_menu() {
+  $items = array();
+  
+  /* Targets list, %webform_menu is an auto-loader wildcard component
+   * provided by the webform module (method is webform_menu_load), and it
+   * auto-loads a webform node.
+   */
+  $items['node/%webform_menu/webform/targets'] = array(
+    'title' => 'Remote Posts',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('webform_remote_post_targets_form', 1),
+    'access callback' => 'user_access',
+    'access arguments' => array('admin webform remote posts'),
+    'file' => 'includes/webform_remote_post.targets.inc',
+    'weight' => 1,
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  // Delete a target
+  $items['node/%webform_menu/webform/targets/%/delete'] = array(
+    'title' => 'Delete repost target',
+    'load arguments' => array(1),
+    'page arguments' => array('webform_remote_post_target_delete_form_submit', 1, 4),
+    'access callback' => 'user_access',
+    'access arguments' => array('admin webform remote posts'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Respond to a Webform submission being inserted.
+ *
+ * Note that this hook is called after a submission has already been saved to
+ * the database. If needing to modify the submission prior to insertion, use
+ * hook_webform_submission_presave().
+ *
+ * @param $node
+ *   The Webform node on which this submission was made.
+ * @param $submission
+ *   The Webform submission that was just inserted into the database.
+ */
+function hook_webform_submission_insert($node, $submission) {
+  // User drupal_http to send each forward.
+}
+
+/**
+ * Implements hook_perm().
+ */
+function webform_remote_post_permission() {
+  return array(
+    'admin webform remote posts' => array(
+      'title' => t('Admin webform remote posts'),
+      'description' => t('Grants access to the "Remote Posts" pill on all webform content.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_theme()
+ *
+ *
+ * @return array An associative array of theme hook information.
+ * @author Enrique Delgado
+ */
+function webform_remote_post_theme($existing, $type, $theme, $path) {
+  $theme = array(
+    // webform_remote_posts.targets.inc.
+    'webform_remote_post_targets_form' => array(
+      'render element' => 'form',
+      'file' => 'includes/webform_remote_post.targets.inc',
+    ),
+  );
+  return $theme;
+};

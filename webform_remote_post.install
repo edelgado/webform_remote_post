@@ -1,0 +1,55 @@
+<?php
+
+/**
+ * @file
+ *   Forward Form Submissions module install/schema hooks.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function webform_remote_post_schema() {
+  $schema = array();
+
+  $schema['webform_remote_post_targets'] = array(
+    'description' => 'Holds information regarding submission forwards that should be sent for each valid form submission',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'The node identifier of a webform.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'tid' => array(
+        'description' => 'The URL target identifier.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'size' => 'small',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'url' => array(
+        'description' => 'The http address that will be used to post upon submission.',
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => 'The label given to the URL target that we are posting to.',
+        'type' => 'text',
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('nid', 'tid'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function webform_remote_post_uninstall() {
+  // Nothing to see here, Drupal automatically removes the schema specified 
+  // in hook_install() above.
+}

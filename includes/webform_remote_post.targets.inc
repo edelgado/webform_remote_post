@@ -1,0 +1,168 @@
+<?php
+
+/**
+ * 
+ * TODO
+ *
+ * @author Enrique Delgado <delgado.enrique@gmail.com>
+ */
+
+/**
+ * An overview of the URL repost targets associated with a given form.
+ */
+function webform_remote_post_targets_form($form, &$form_state, $webform_node) {
+
+  $form['#tree'] = TRUE;
+  $form['#node'] = $webform_node;
+
+  // Internal to the form and never displayed to the screen.
+  $form['nid'] = array(
+    '#type' => 'value',
+    '#value' => $webform_node->nid,
+  );
+  
+  $targets = array();
+  
+  $targets = db_select('webform_remote_post_targets')
+    ->fields('webform_remote_post_targets')
+    ->condition('nid', $webform_node->nid)
+    ->execute()
+    ->fetchAllAssoc('tid', PDO::FETCH_ASSOC);
+
+  foreach ($targets as $tid => $data) {
+    $form['targets'][$tid]['label'] = array(
+      '#markup' => check_plain($data['label']),
+    );
+    $form['targets'][$tid]['url'] = array(
+      '#markup' => check_plain($data['url']),
+    );
+  }
+
+  /* Form elements for a new remote post target. Actually rendered by
+   * the theme_webform_remote_post_targets_form function below.
+   */
+  $form['add']['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Label'),
+    '#size' => 20,
+    '#maxlength' => 60,
+    '#required' => FALSE,
+  );
+  
+  $form['add']['url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Target URL'),
+    '#size' => 60,
+    '#maxlength' => 500,
+    '#required' => TRUE,
+  );
+
+  $form['add_button'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add'),
+    '#weight' => 45,
+  );
+
+  $form['#validate'] = array('webform_remote_post_target_validate');
+
+  return $form;
+}
+
+/**
+ * Theme the node components form. Use a table to organize the components.
+ *
+ * @param $form
+ *   The form array.
+ * @return
+ *   Formatted HTML form, ready for display.
+ */
+function theme_webform_remote_post_targets_form($variables) {
+  #echo "<pre>" . print_r($variables, true) . "</pre>";
+  $form = $variables['form'];
+  #echo "<pre>" . print_r($form['targets'], true) . "</pre>";
+  $webform_node = $form['#node'];
+
+  $header = array(t('Label'), t('Target URL'), t('Operations'));
+  $rows = array();
+
+  if (!empty($form['targets'])) {
+    foreach (element_children($form['targets']) as $tid) {
+      // Add each target to a table row.
+      $rows[] = array(
+        drupal_render($form['targets'][$tid]['label']),
+        drupal_render($form['targets'][$tid]['url']),
+        l(t('Delete'), 'node/' . $webform_node->nid . '/webform/targets/' . $tid . '/delete'),
+      );
+    }
+  }
+  else {
+    $rows[] = array(array('data' => t('No remote target URLs specified yet. Add a target URL below.'), 'colspan' => 3));
+  }
+
+  // Add a row containing form elements for a new item.
+  $row_data = array(
+    array('colspan' => 2, 'data' => drupal_render($form['add'])),
+    array('colspan' => 1, 'data' => drupal_render($form['add_button'])),
+  );
+  $rows[] = array('data' => $row_data, 'class' => array('webform-remote-post-add-target-form'));
+
+  $output = '';
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'webform-remote-post-targets')));
+  $output .= drupal_render_children($form);
+  return $output;
+}
+
+/**
+ * Validate handler for webform_remote_post_targets_form().
+ */
+function webform_remote_post_target_validate($form, &$form_state) {
+  if (!valid_url($form_state['values']['add']['url'])) {
+    $url = trim($form_state['values']['add']['url']);
+    form_set_error('url', t('The entered URL "@url" does not appear valid.', array('@url' => $url)));
+  }
+}
+
+/**
+ * Submit handler for webform_remote_post_forwards_form().
+ */
+function webform_remote_post_targets_form_submit($form, &$form_state) {
+  $target = array();
+  if (!empty($form_state['values']['add']['label'])) {
+    $target['label'] = trim($form_state['values']['add']['label']);
+  }
+
+  $target['url'] = trim($form_state['values']['add']['url']);
+  $target['nid'] = trim($form_state['values']['nid']);
+  
+  // TODO: This is not race-condition safe. Switch to using transactions?
+  $next_id_query = db_select('webform_remote_post_targets')->condition('nid', $target['nid']);
+  $next_id_query->addExpression('MAX(tid) + 1', 'tid');
+  $target['tid'] = $next_id_query->execute()->fetchField();
+  if ($target['tid'] == NULL) {
+    $target['tid'] = 1;
+  }
+
+  $success = drupal_write_record('webform_remote_post_targets', $target);
+  
+  // Write a log if we weren't able to save the target successfully.
+  if ($success === false) {
+    watchdog('webform_remote_post', 'There was an error writing a new remote post target to the database.', array(), WATCHDOG_ERROR);
+  }
+}
+
+/**
+ * Submit handler for webform_remote_post_target_delete_form().
+ */
+function webform_remote_post_target_delete_form_submit($form, &$form_state, $webform_mode, $target_id) {
+  //echo "<pre>" . print_r($form_state) . "</pre>";
+  // Delete the target entry.
+
+  db_delete('webform_remote_post_targets')
+    ->condition('nid', $webform_mode->nid)
+    ->condition('tid', $target_id)
+    ->execute();
+    
+  drupal_set_message(t('Remote post target deleted.'));
+
+  drupal_goto('node/' . $webform_mode->nid . '/webform/targets');
+}

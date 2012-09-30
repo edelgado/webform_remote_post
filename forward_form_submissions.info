@@ -1,5 +1,0 @@
-name = Forward Form Submissions
-description = Forward Webform submissions to any arbitrary URL, presumably, an application or script that will use the form data and perform further processing of it.
-core = 7.x
-dependencies[] = webform
-package = Webform
