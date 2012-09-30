@@ -1,10 +1,9 @@
 <?php
 
 /**
- * 
- * TODO
+ * @file
+ * Webform Remote Post URL targets administration pages.
  *
- * @author Enrique Delgado <delgado.enrique@gmail.com>
  */
 
 /**
@@ -38,9 +37,9 @@ function webform_remote_post_targets_form($form, &$form_state, $webform_node) {
     );
   }
 
-  /* Form elements for a new remote post target. Actually rendered by
-   * the theme_webform_remote_post_targets_form function below.
-   */
+  // Form elements for a new remote post target. Actually rendered by
+  // the theme_webform_remote_post_targets_form function below.
+  
   $form['add']['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
@@ -77,9 +76,7 @@ function webform_remote_post_targets_form($form, &$form_state, $webform_node) {
  *   Formatted HTML form, ready for display.
  */
 function theme_webform_remote_post_targets_form($variables) {
-  #echo "<pre>" . print_r($variables, true) . "</pre>";
   $form = $variables['form'];
-  #echo "<pre>" . print_r($form['targets'], true) . "</pre>";
   $webform_node = $form['#node'];
 
   $header = array(t('Label'), t('Target URL'), t('Operations'));
@@ -134,7 +131,7 @@ function webform_remote_post_targets_form_submit($form, &$form_state) {
   $target['url'] = trim($form_state['values']['add']['url']);
   $target['nid'] = trim($form_state['values']['nid']);
   
-  // TODO: This is not race-condition safe. Switch to using transactions?
+  // TODO: Like in webform, this is not race-condition safe. Switch to using transactions as well?
   $next_id_query = db_select('webform_remote_post_targets')->condition('nid', $target['nid']);
   $next_id_query->addExpression('MAX(tid) + 1', 'tid');
   $target['tid'] = $next_id_query->execute()->fetchField();
@@ -145,7 +142,7 @@ function webform_remote_post_targets_form_submit($form, &$form_state) {
   $success = drupal_write_record('webform_remote_post_targets', $target);
   
   // Write a log if we weren't able to save the target successfully.
-  if ($success === false) {
+  if ($success === FALSE) {
     watchdog('webform_remote_post', 'There was an error writing a new remote post target to the database.', array(), WATCHDOG_ERROR);
   }
 }
@@ -154,15 +151,13 @@ function webform_remote_post_targets_form_submit($form, &$form_state) {
  * Submit handler for webform_remote_post_target_delete_form().
  */
 function webform_remote_post_target_delete_form_submit($form, &$form_state, $webform_mode, $target_id) {
-  //echo "<pre>" . print_r($form_state) . "</pre>";
-  // Delete the target entry.
 
+  // Delete the target entry.
   db_delete('webform_remote_post_targets')
     ->condition('nid', $webform_mode->nid)
     ->condition('tid', $target_id)
     ->execute();
     
   drupal_set_message(t('Remote post target deleted.'));
-
   drupal_goto('node/' . $webform_mode->nid . '/webform/targets');
 }

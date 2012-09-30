@@ -1,4 +1,13 @@
 <?php
+/**
+ * @file
+ * Webform Remote Post module.
+ *
+ * Webform Remote Post is a module that works along the 
+ * @link http://drupal.org/project/webform Webform @endlink module.
+ * It eases the integration between Webforms and other web 
+ * applications.
+ */
 
 /**
  * Implements hook_help.
@@ -24,14 +33,15 @@ function webform_remote_post_help($path, $arg) {
 
 /**
  * Implements hook_menu().
+ *
+ * @see webform_menu_load()
  */
 function webform_remote_post_menu() {
   $items = array();
   
-  /* Targets list, %webform_menu is an auto-loader wildcard component
-   * provided by the webform module (method is webform_menu_load), and it
-   * auto-loads a webform node.
-   */
+  // Targets list, %webform_menu is an auto-loader wildcard component
+  // provided by the webform module (method is webform_menu_load), and it
+  // auto-loads a webform node.
   $items['node/%webform_menu/webform/targets'] = array(
     'title' => 'Remote Posts',
     'page callback' => 'drupal_get_form',
@@ -59,8 +69,10 @@ function webform_remote_post_menu() {
  * Respond to a Webform submission being inserted.
  *
  * Note that this hook is called after a submission has already been saved to
- * the database. If needing to modify the submission prior to insertion, use
- * hook_webform_submission_presave().
+ * the database.
+ *
+ * This is the main purpose of this module, to emit HTTP POSTs based on the
+ * saved webform data.
  *
  * @param $node
  *   The Webform node on which this submission was made.
@@ -68,7 +80,7 @@ function webform_remote_post_menu() {
  *   The Webform submission that was just inserted into the database.
  */
 function hook_webform_submission_insert($node, $submission) {
-  // User drupal_http to send each forward.
+  // TODO: User drupal_http to send each forward.
 }
 
 /**
