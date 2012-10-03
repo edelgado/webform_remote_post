@@ -78,9 +78,86 @@ function webform_remote_post_menu() {
  *   The Webform node on which this submission was made.
  * @param $submission
  *   The Webform submission that was just inserted into the database.
+ * @todo Support of Grid component.
+ * @todo Support of File component.
  */
-function hook_webform_submission_insert($node, $submission) {
-  // TODO: User drupal_http to send each forward.
+function webform_remote_post_webform_submission_insert($node, $submission) {  
+  // Skip draft forms:
+  if ($submission->is_draft) {
+    return;
+  }
+  
+  // Get this webform node remote targets from the DB:
+  $targets = array();
+  $targets = db_select('webform_remote_post_targets')
+    ->fields('webform_remote_post_targets')
+    ->condition('nid', $node->nid)
+    ->execute()
+    ->fetchAllAssoc('tid', PDO::FETCH_ASSOC);
+    
+  
+  /*
+  $submission_string = print_r($submission, true);
+  watchdog('webform_remote_post', 'Webform submission array is: %array', 
+    array('%array' => $submission_string), WATCHDOG_DEBUG);
+  */
+  /*
+  $node_string = "<pre>" .  print_r($node, true) . "</pre>";
+  watchdog('webform_remote_post', 'Webform webform node array is: %array', 
+    array('%array' => $node_string), WATCHDOG_DEBUG);
+  */
+    
+  // Create a map with webform component ID's and the component themselves,
+  // handly later on.
+  $component_map = array();
+  foreach ($node->webform['components'] as $component) {
+    $component_map[$component['cid']] = $component;
+  }
+  
+  // Prepare the submission data for remote posting. Creating a two-dimensional
+  // array of form field names and the data.
+  $payload = array();
+  foreach ($submission->data as $cid => $component_data) {
+    $payload[$component_map[$cid]['form_key']] = implode(', ', $component_data['value']);
+  }
+  // URL-encode the payload
+  $post_data = http_build_query($payload);
+  
+  // Repost data to each target. Begin by setting the
+  // options for drupal_http_request().
+  $drupal_http_request_options = array(
+    'method' => 'POST',
+    'data' => $post_data,
+    'timeout' => 15,
+    'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
+  );
+  // Acceptable server response codes.
+  $benign_reponse_codes = array('200', '301', '302', '307');
+  
+  // Repost data to each target.
+  foreach ($targets as $tid => $target) {
+    // Where the magic happens:
+    $request = drupal_http_request($target['url'], $drupal_http_request_options);
+    // Debug some info:
+    // $request_string = "<pre>" .  print_r($request, true) . "</pre>";
+    // watchdog('webform_remote_post', 'HTTP request result object was: %result', 
+    //   array('%result' => $request_string), WATCHDOG_DEBUG);
+    // Log any errors.
+    if (isset($request->code) && !in_array($request->code, $benign_reponse_codes)) {
+      $log_msg = 'A remote post to %url by webform node ID %id returned a ';
+      $log_msg .= '\'%code\' code, which is a different HTTP response code ';
+      $log_msg .= 'than expected. Please make sure that the remote post URL ';
+      $log_msg .= 'is correct in the Remote Posts webform settings, and that ';
+      $log_msg .= 'the post was received in the remote system.';
+      watchdog('webform_remote_post', 
+               $log_msg, 
+               array('%id'   => $$node->nid,
+                     '%url'  => $target['url'], 
+                     '%code' => $request->code,
+                     ), 
+               WATCHDOG_WARNING);
+    }
+  }
 }
 
 /**
