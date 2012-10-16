@@ -120,6 +120,7 @@ function webform_remote_post_webform_submission_insert($node, $submission) {
   foreach ($submission->data as $cid => $component_data) {
     $payload[$component_map[$cid]['form_key']] = implode(', ', $component_data['value']);
   }
+  
   // URL-encode the payload
   $post_data = http_build_query($payload);
   
@@ -131,6 +132,7 @@ function webform_remote_post_webform_submission_insert($node, $submission) {
     'timeout' => 15,
     'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
   );
+  
   // Acceptable server response codes.
   $benign_reponse_codes = array('200', '301', '302', '307');
   
@@ -151,7 +153,7 @@ function webform_remote_post_webform_submission_insert($node, $submission) {
       $log_msg .= 'the post was received in the remote system.';
       watchdog('webform_remote_post', 
                $log_msg, 
-               array('%id'   => $$node->nid,
+               array('%id'   => $node->nid,
                      '%url'  => $target['url'], 
                      '%code' => $request->code,
                      ), 
