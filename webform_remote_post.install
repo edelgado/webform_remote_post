@@ -48,6 +48,22 @@ function webform_remote_post_schema() {
 }
 
 /**
+ * Add the ability to enable or disable a remote post without having to delete it.
+ */
+function webform_remote_post_update_7001() {
+  if (!db_field_exists('webform_remote_post_targets', 'enabled')) {
+    $spec = array(
+      'description' => 'Should we post to this target?',
+      'type' => 'int',
+      'size' => 'tiny',
+      'not null' => TRUE,
+      'default' => 1,
+    );
+    db_add_field('webform_remote_post_targets', 'enabled', $spec);
+  }
+}
+
+/**
  * Implements hook_uninstall().
  */
 function webform_remote_post_uninstall() {

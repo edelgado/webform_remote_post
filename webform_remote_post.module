@@ -92,21 +92,10 @@ function webform_remote_post_webform_submission_insert($node, $submission) {
   $targets = db_select('webform_remote_post_targets')
     ->fields('webform_remote_post_targets')
     ->condition('nid', $node->nid)
+    ->condition('enabled', 1)
     ->execute()
     ->fetchAllAssoc('tid', PDO::FETCH_ASSOC);
-    
-  
-  /*
-  $submission_string = print_r($submission, true);
-  watchdog('webform_remote_post', 'Webform submission array is: %array', 
-    array('%array' => $submission_string), WATCHDOG_DEBUG);
-  */
-  /*
-  $node_string = "<pre>" .  print_r($node, true) . "</pre>";
-  watchdog('webform_remote_post', 'Webform webform node array is: %array', 
-    array('%array' => $node_string), WATCHDOG_DEBUG);
-  */
-    
+
   // Create a map with webform component ID's and the component themselves,
   // handly later on.
   $component_map = array();
@@ -140,10 +129,6 @@ function webform_remote_post_webform_submission_insert($node, $submission) {
   foreach ($targets as $tid => $target) {
     // Where the magic happens:
     $request = drupal_http_request($target['url'], $drupal_http_request_options);
-    // Debug some info:
-    // $request_string = "<pre>" .  print_r($request, true) . "</pre>";
-    // watchdog('webform_remote_post', 'HTTP request result object was: %result', 
-    //   array('%result' => $request_string), WATCHDOG_DEBUG);
     // Log any errors.
     if (isset($request->code) && !in_array($request->code, $benign_reponse_codes)) {
       $log_msg = 'A remote post to %url by webform node ID %id returned a ';
@@ -169,7 +154,7 @@ function webform_remote_post_permission() {
   return array(
     'admin webform remote posts' => array(
       'title' => t('Admin webform remote posts'),
-      'description' => t('Grants access to the "Remote Posts" pill on all webform content.'),
+      'description' => t('Grants access to the "Remote Posts" webform settings on all webform content.'),
     ),
   );
 }
