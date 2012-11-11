@@ -63,7 +63,7 @@ function webform_remote_post_targets_form($form, &$form_state, $webform_node) {
     '#type' => 'textfield',
     '#title' => t('Target URL'),
     '#description' => t('The full URL to POST to. E.g. http://www.mycrm.com/form_handler.php'),
-    '#size' => 60,
+    '#size' => 100,
     '#maxlength' => 500,
     '#required' => TRUE,
   );
@@ -106,7 +106,7 @@ function theme_webform_remote_post_targets_form($variables) {
     }
   }
   else {
-    $rows[] = array(array('data' => t('No remote target URLs specified yet. Add a target URL below.'), 'colspan' => 3));
+    $rows[] = array(array('data' => t('No remote target URLs specified yet. Add a target URL below.'), 'colspan' => 4));
   }
 
   // Add a row containing form elements for a new item.
