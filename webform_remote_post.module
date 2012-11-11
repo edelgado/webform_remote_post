@@ -21,13 +21,40 @@
  */
 function webform_remote_post_help($path, $arg) {
   switch ($path) {
-    case "admin/help#webform_remote_post":
+    case 'admin/help#webform_remote_post':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('Coming soon') . '</p>';
+      $output .= '<p>' . t('Webform Remote Post is a module that works along 
+                            the Webform module. It eases the integration 
+                            between Webforms and other web applications like
+                            Salesforce and Eloqua.') . '</p>';
+      $output .= '<p>' . t('Webform Remote Post works by POSTing form 
+                            submissions to any arbitrary URL, presumably, 
+                            an application or script that will use the form 
+                            data and perform further processing of it. It 
+                            respects the form\'s validation and wil only 
+                            send submissions that passed validation and 
+                            are no longer in a draft state. Multiple 
+                            remote posts can be setup for each individual 
+                            form, allowing for the submission of data 
+                            to multiple systems at once.') . '</p>';
       $output .= '<h3>' . t('Use Cases') . '</h3>';
-      $output .= '<p>' . t('more...') . '</p>';
-      break;
+      $output .= '<ul>';
+      $output .= '<li>' . t('CRM Integration &ndash; If you have a CRM like 
+                             Salesforce, you can use this module to push 
+                             submissions using the web-to-lead mechanism to 
+                             create a Lead from every Webform submission in 
+                             your Drupal site.') . '</li>';
+      $output .= '<li>' . t('Eloqua Integration &ndash; Create lead forms 
+                             to be submitted to Eloqua. Add the hidden fields 
+                             as indicated in Eloqua and it\'s ready to go.') . '</li>';
+      $output .= '<li>' . t('Re-posting to any 3rd party system &ndash; This 
+                             module is general purpose. You need the form data 
+                             to be immediately submitted to another system 
+                             automatically? Add a remote post target to it!') . '</li>';
+      $output .= '</ul>';
+      return $output;
+    break;
   }
 }
 
@@ -66,6 +93,8 @@ function webform_remote_post_menu() {
 }
 
 /**
+ * Implements hook_webform_submission_insert()
+ * 
  * Respond to a Webform submission being inserted.
  *
  * Note that this hook is called after a submission has already been saved to
