@@ -45,7 +45,7 @@ function webform_remote_post_schema() {
         'size' => 'tiny',
         'not null' => TRUE,
         'default' => 1,
-      )
+      ),
     ),
     'primary key' => array('nid', 'tid'),
   );
