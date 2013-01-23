@@ -98,9 +98,9 @@ function theme_webform_remote_post_targets_form($variables) {
     foreach (element_children($form['targets']) as $tid) {
       // Add each target to a table row.
       $rows[] = array(
-        check_plain($form['targets'][$tid]['status']),
-        check_plain($form['targets'][$tid]['label']),
-        check_plain($form['targets'][$tid]['url']),
+        drupal_render($form['targets'][$tid]['status']),
+        drupal_render($form['targets'][$tid]['label']),
+        drupal_render($form['targets'][$tid]['url']),
         l(t('Delete'), 'node/' . $webform_node->nid . '/webform/targets/' . $tid . '/delete'),
       );
     }
