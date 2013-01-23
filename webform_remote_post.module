@@ -13,11 +13,6 @@
  * Implements hook_help().
  *
  * Displays help and module information.
- *
- * @param string $path
- *   Which path of the site we're using to display help
- * @param array $arg
- *   Array that holds the current path as returned from arg() function
  */
 function webform_remote_post_help($path, $arg) {
   switch ($path) {
@@ -55,6 +50,7 @@ function webform_remote_post_help($path, $arg) {
       $output .= '</ul>';
       return $output;
     break;
+
   }
 }
 
@@ -191,9 +187,6 @@ function webform_remote_post_permission() {
 
 /**
  * Implements hook_theme().
- *
- * @return array
- *   An associative array of theme hook information.
  */
 function webform_remote_post_theme($existing, $type, $theme, $path) {
   $theme = array(
