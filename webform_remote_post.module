@@ -49,8 +49,6 @@ function webform_remote_post_help($path, $arg) {
                              automatically? Add a remote post target to it!') . '</li>';
       $output .= '</ul>';
       return $output;
-      break;
-
   }
 }
 
