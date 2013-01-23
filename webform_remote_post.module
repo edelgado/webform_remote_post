@@ -3,20 +3,20 @@
  * @file
  * Webform Remote Post module.
  *
- * Webform Remote Post is a module that works along the 
+ * Webform Remote Post is a module that works along the
  * @link http://drupal.org/project/webform Webform @endlink module.
- * It eases the integration between Webforms and other web 
+ * It eases the integration between Webforms and other web
  * applications.
  */
 
 /**
- * Implements hook_help.
+ * Implements hook_help().
  *
  * Displays help and module information.
  *
- * @param path 
+ * @param string $path
  *   Which path of the site we're using to display help
- * @param arg 
+ * @param array $arg
  *   Array that holds the current path as returned from arg() function
  */
 function webform_remote_post_help($path, $arg) {
@@ -24,37 +24,37 @@ function webform_remote_post_help($path, $arg) {
     case 'admin/help#webform_remote_post':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('Webform Remote Post is a module that works along 
-                            the Webform module. It eases the integration 
+      $output .= '<p>' . t('Webform Remote Post is a module that works along
+                            the Webform module. It eases the integration
                             between Webforms and other web applications like
                             Salesforce and Eloqua.') . '</p>';
-      $output .= '<p>' . t('Webform Remote Post works by POSTing form 
-                            submissions to any arbitrary URL, presumably, 
-                            an application or script that will use the form 
-                            data and perform further processing of it. It 
-                            respects the form\'s validation and wil only 
-                            send submissions that passed validation and 
-                            are no longer in a draft state. Multiple 
-                            remote posts can be setup for each individual 
-                            form, allowing for the submission of data 
+      $output .= '<p>' . t('Webform Remote Post works by POSTing form
+                            submissions to any arbitrary URL, presumably,
+                            an application or script that will use the form
+                            data and perform further processing of it. It
+                            respects the form\'s validation and wil only
+                            send submissions that passed validation and
+                            are no longer in a draft state. Multiple
+                            remote posts can be setup for each individual
+                            form, allowing for the submission of data
                             to multiple systems at once.') . '</p>';
       $output .= '<h3>' . t('Use Cases') . '</h3>';
       $output .= '<ul>';
-      $output .= '<li>' . t('CRM Integration &ndash; If you have a CRM like 
-                             Salesforce, you can use this module to push 
-                             submissions using the web-to-lead mechanism to 
-                             create a Lead from every Webform submission in 
+      $output .= '<li>' . t('CRM Integration &ndash; If you have a CRM like
+                             Salesforce, you can use this module to push
+                             submissions using the web-to-lead mechanism to
+                             create a Lead from every Webform submission in
                              your Drupal site.') . '</li>';
-      $output .= '<li>' . t('Eloqua Integration &ndash; Create lead forms 
-                             to be submitted to Eloqua. Add the hidden fields 
+      $output .= '<li>' . t('Eloqua Integration &ndash; Create lead forms
+                             to be submitted to Eloqua. Add the hidden fields
                              as indicated in Eloqua and it\'s ready to go.') . '</li>';
-      $output .= '<li>' . t('Re-posting to any 3rd party system &ndash; This 
-                             module is general purpose. You need the form data 
-                             to be immediately submitted to another system 
+      $output .= '<li>' . t('Re-posting to any 3rd party system &ndash; This
+                             module is general purpose. You need the form data
+                             to be immediately submitted to another system
                              automatically? Add a remote post target to it!') . '</li>';
       $output .= '</ul>';
       return $output;
-    break;
+      break;
   }
 }
 
@@ -65,7 +65,7 @@ function webform_remote_post_help($path, $arg) {
  */
 function webform_remote_post_menu() {
   $items = array();
-  
+
   // Targets list, %webform_menu is an auto-loader wildcard component
   // provided by the webform module (method is webform_menu_load), and it
   // auto-loads a webform node.
@@ -80,7 +80,7 @@ function webform_remote_post_menu() {
     'type' => MENU_LOCAL_TASK,
   );
 
-  // Delete a target
+  // Delete a target.
   $items['node/%webform_menu/webform/targets/%/delete'] = array(
     'title' => 'Delete repost target',
     'load arguments' => array(1),
@@ -93,8 +93,8 @@ function webform_remote_post_menu() {
 }
 
 /**
- * Implements hook_webform_submission_insert()
- * 
+ * Implements hook_webform_submission_insert().
+ *
  * Respond to a Webform submission being inserted.
  *
  * Note that this hook is called after a submission has already been saved to
@@ -103,19 +103,20 @@ function webform_remote_post_menu() {
  * This is the main purpose of this module, to emit HTTP POSTs based on the
  * saved webform data.
  *
- * @param $node
+ * @param object $node
  *   The Webform node on which this submission was made.
- * @param $submission
+ * @param object $submission
  *   The Webform submission that was just inserted into the database.
+ *
  * @todo Support of Grid component.
  * @todo Support of File component.
  */
-function webform_remote_post_webform_submission_insert($node, $submission) {  
+function webform_remote_post_webform_submission_insert($node, $submission) {
   // Skip draft forms:
   if ($submission->is_draft) {
     return;
   }
-  
+
   // Get this webform node remote targets from the DB:
   $targets = array();
   $targets = db_select('webform_remote_post_targets')
@@ -131,17 +132,17 @@ function webform_remote_post_webform_submission_insert($node, $submission) {
   foreach ($node->webform['components'] as $component) {
     $component_map[$component['cid']] = $component;
   }
-  
+
   // Prepare the submission data for remote posting. Creating a two-dimensional
   // array of form field names and the data.
   $payload = array();
   foreach ($submission->data as $cid => $component_data) {
     $payload[$component_map[$cid]['form_key']] = implode(', ', $component_data['value']);
   }
-  
-  // URL-encode the payload
+
+  // URL-encode the payload.
   $post_data = http_build_query($payload);
-  
+
   // Repost data to each target. Begin by setting the
   // options for drupal_http_request().
   $drupal_http_request_options = array(
@@ -150,10 +151,10 @@ function webform_remote_post_webform_submission_insert($node, $submission) {
     'timeout' => 15,
     'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
   );
-  
+
   // Acceptable server response codes.
   $benign_reponse_codes = array('200', '301', '302', '307');
-  
+
   // Repost data to each target.
   foreach ($targets as $tid => $target) {
     // Where the magic happens:
@@ -165,13 +166,15 @@ function webform_remote_post_webform_submission_insert($node, $submission) {
       $log_msg .= 'than expected. Please make sure that the remote post URL ';
       $log_msg .= 'is correct in the Remote Posts webform settings, and that ';
       $log_msg .= 'the post was received in the remote system.';
-      watchdog('webform_remote_post', 
-               $log_msg, 
-               array('%id'   => $node->nid,
-                     '%url'  => $target['url'], 
-                     '%code' => $request->code,
-                     ), 
-               WATCHDOG_WARNING);
+      watchdog(
+        'webform_remote_post',
+        $log_msg,
+        array(
+          '%id'   => $node->nid,
+          '%url'  => $target['url'],
+          '%code' => $request->code,
+        ),
+        WATCHDOG_WARNING);
     }
   }
 }
@@ -189,11 +192,10 @@ function webform_remote_post_permission() {
 }
 
 /**
- * Implements hook_theme()
+ * Implements hook_theme().
  *
- *
- * @return array An associative array of theme hook information.
- * @author Enrique Delgado
+ * @return array
+ *   An associative array of theme hook information.
  */
 function webform_remote_post_theme($existing, $type, $theme, $path) {
   $theme = array(

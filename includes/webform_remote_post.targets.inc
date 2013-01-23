@@ -3,7 +3,6 @@
 /**
  * @file
  * Webform Remote Post URL targets administration pages.
- *
  */
 
 /**
@@ -19,9 +18,9 @@ function webform_remote_post_targets_form($form, &$form_state, $webform_node) {
     '#type' => 'value',
     '#value' => $webform_node->nid,
   );
-  
+
   $targets = array();
-  
+
   $targets = db_select('webform_remote_post_targets')
     ->fields('webform_remote_post_targets')
     ->condition('nid', $webform_node->nid)
@@ -49,7 +48,6 @@ function webform_remote_post_targets_form($form, &$form_state, $webform_node) {
 
   // Form elements for a new remote post target. Actually rendered by
   // the theme_webform_remote_post_targets_form function below.
-  
   $form['add']['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
@@ -58,7 +56,7 @@ function webform_remote_post_targets_form($form, &$form_state, $webform_node) {
     '#maxlength' => 60,
     '#required' => FALSE,
   );
-  
+
   $form['add']['url'] = array(
     '#type' => 'textfield',
     '#title' => t('Target URL'),
@@ -82,9 +80,11 @@ function webform_remote_post_targets_form($form, &$form_state, $webform_node) {
 /**
  * Theme the node components form. Use a table to organize the components.
  *
- * @param $form
- *   The form array.
- * @return
+ * @param array $variables
+ *   An array representing the form, with these keys:
+ *   - form: the form array.
+ *
+ * @return array
  *   Formatted HTML form, ready for display.
  */
 function theme_webform_remote_post_targets_form($variables) {
@@ -117,7 +117,10 @@ function theme_webform_remote_post_targets_form($variables) {
   $rows[] = array('data' => $row_data, 'class' => array('webform-remote-post-add-target-form'));
 
   $output = '';
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'webform-remote-post-targets')));
+  $output .= theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'attributes' => array('id' => 'webform-remote-post-targets')));
   $output .= drupal_render_children($form);
   return $output;
 }
@@ -140,11 +143,12 @@ function webform_remote_post_targets_form_submit($form, &$form_state) {
   if (!empty($form_state['values']['add']['label'])) {
     $target['label'] = trim($form_state['values']['add']['label']);
   }
-  
+
   $target['url'] = trim($form_state['values']['add']['url']);
   $target['nid'] = trim($form_state['values']['nid']);
-  
-  // TODO: Like in webform, this is not race-condition safe. Switch to using transactions as well?
+
+  // TODO: Like in webform, this is not race-condition safe.
+  // Switch to using transactions as well?
   $next_id_query = db_select('webform_remote_post_targets')->condition('nid', $target['nid']);
   $next_id_query->addExpression('MAX(tid) + 1', 'tid');
   $target['tid'] = $next_id_query->execute()->fetchField();
@@ -153,7 +157,7 @@ function webform_remote_post_targets_form_submit($form, &$form_state) {
   }
 
   $success = drupal_write_record('webform_remote_post_targets', $target);
-  
+
   // Write a log if we weren't able to save the target successfully.
   if ($success === FALSE) {
     watchdog('webform_remote_post', 'There was an error writing a new remote post target to the database.', array(), WATCHDOG_ERROR);
@@ -170,7 +174,7 @@ function webform_remote_post_target_delete_form_submit($form, &$form_state, $web
     ->condition('nid', $webform_mode->nid)
     ->condition('tid', $target_id)
     ->execute();
-    
+
   drupal_set_message(t('Remote post target deleted.'));
   drupal_goto('node/' . $webform_mode->nid . '/webform/targets');
 }
@@ -178,17 +182,19 @@ function webform_remote_post_target_delete_form_submit($form, &$form_state, $web
 /**
  * Callback for target enabled flag.
  *
- * @return renderable array (the textfield element)
+ * @return array
+ *   The textfield element renderable array
  */
 function webform_remote_post_update_enabled_flag($form, $form_state) {
   // The form has already been submitted and updated. We can return the replaced
   // item as it is.
-  
-  // Looks like we can use $form_state['triggering_element'] to tell which target to change:
+
+  // Looks like we can use $form_state['triggering_element'] to tell which
+  // target to change:
   // $form_state['triggering_element']['value'] has the new value to set.
   // $form_state['values']['nid'] has the webform ID to chage.
-  // What's the best place to get the target ID from? Best guess right now is $form_state['triggering_element']['array_parents'][1] :-/
-
+  // What's the best place to get the target ID from? Best guess right now
+  // is $form_state['triggering_element']['array_parents'][1] :-/
   $target_id = $form_state['triggering_element']['#array_parents'][1];
 
   // Update the remote post target:

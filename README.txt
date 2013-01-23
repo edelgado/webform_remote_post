@@ -1,8 +1,8 @@
 
 -- SUMMARY --
 
-Webform Remote Post is a module that works along the Webform module. It eases the
-integration between Webforms and other web applications by extending the
+Webform Remote Post is a module that works along the Webform module. It eases
+the integration between Webforms and other web applications by extending the
 out-of-the-box functionality if the Webform module.
 
 Webform Remote Post works by POSTing form submissions to any arbitrary URL,
@@ -23,8 +23,8 @@ hook_webform_submission_insert() hook definition.
 
 -- INSTALLATION --
 
-* Install as usual, see 
-  http://drupal.org/documentation/install/modules-themes/modules-7 for further 
+* Install as usual, see
+  http://drupal.org/documentation/install/modules-themes/modules-7 for further
   information.
 
 
@@ -37,7 +37,7 @@ hook_webform_submission_insert() hook definition.
     Users in roles with the "Display drupal links" permission will be able
     to see the "Remote Posts" edit section of a webform. Here, they can
     add more targets, remove them or disable them.
-    
+
   Note that the sending of data to remote targets is not affected by this
   permission. In fact, if your form is accessible to anonymous users,
   filling out the form and submitting it will trigger the remote form
@@ -48,7 +48,7 @@ hook_webform_submission_insert() hook definition.
   2) Webform » Remote Posts
   3) Label: It's just an admin-friendly internal name for the remote post
      you are setting up. Things like "My CRM" or "My Cool App".
-  4) Target URL: The full URL to POST the complete form data into. The 
+  4) Target URL: The full URL to POST the complete form data into. The
      receiving end should expect data as if a simple HTML form was configured
      with an "action" value of this URL.
 
