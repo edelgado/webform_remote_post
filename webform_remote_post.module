@@ -54,7 +54,7 @@ function webform_remote_post_help($path, $arg) {
                              automatically? Add a remote post target to it!') . '</li>';
       $output .= '</ul>';
       return $output;
-      break;
+    break;
   }
 }
 
@@ -84,7 +84,10 @@ function webform_remote_post_menu() {
   $items['node/%webform_menu/webform/targets/%/delete'] = array(
     'title' => 'Delete repost target',
     'load arguments' => array(1),
-    'page arguments' => array('webform_remote_post_target_delete_form_submit', 1, 4),
+    'page arguments' => array(
+      'webform_remote_post_target_delete_form_submit',
+      1,
+      4),
     'access callback' => 'user_access',
     'access arguments' => array('admin webform remote posts'),
     'type' => MENU_CALLBACK,
@@ -102,11 +105,6 @@ function webform_remote_post_menu() {
  *
  * This is the main purpose of this module, to emit HTTP POSTs based on the
  * saved webform data.
- *
- * @param object $node
- *   The Webform node on which this submission was made.
- * @param object $submission
- *   The Webform submission that was just inserted into the database.
  *
  * @todo Support of Grid component.
  * @todo Support of File component.

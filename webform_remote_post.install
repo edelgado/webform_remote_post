@@ -47,8 +47,7 @@ function webform_remote_post_schema() {
 }
 
 /**
- * Add the ability to enable or disable a remote post without having to delete
- * it.
+ * Add the ability to enable/disable a remote post without having to delete it.
  */
 function webform_remote_post_update_7001() {
   if (!db_field_exists('webform_remote_post_targets', 'enabled')) {
@@ -61,12 +60,4 @@ function webform_remote_post_update_7001() {
     );
     db_add_field('webform_remote_post_targets', 'enabled', $spec);
   }
-}
-
-/**
- * Implements hook_uninstall().
- */
-function webform_remote_post_uninstall() {
-  // Nothing to see here, Drupal automatically removes the schema specified
-  // in hook_install() above.
 }

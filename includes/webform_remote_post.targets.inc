@@ -188,7 +188,6 @@ function webform_remote_post_target_delete_form_submit($form, &$form_state, $web
 function webform_remote_post_update_enabled_flag($form, $form_state) {
   // The form has already been submitted and updated. We can return the replaced
   // item as it is.
-
   // Looks like we can use $form_state['triggering_element'] to tell which
   // target to change:
   // $form_state['triggering_element']['value'] has the new value to set.
