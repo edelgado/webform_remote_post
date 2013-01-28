@@ -27,7 +27,7 @@ function webform_remote_post_help($path, $arg) {
                             submissions to any arbitrary URL, presumably,
                             an application or script that will use the form
                             data and perform further processing of it. It
-                            respects the form\'s validation and wil only
+                            respects the form\'s validation and will only
                             send submissions that passed validation and
                             are no longer in a draft state. Multiple
                             remote posts can be setup for each individual
