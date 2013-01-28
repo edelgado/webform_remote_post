@@ -7,7 +7,7 @@ out-of-the-box functionality if the Webform module.
 
 Webform Remote Post works by POSTing form submissions to any arbitrary URL,
 presumably, an application or script that will use the form data and perform
-further processing of it. It respects the form's validation and wil only send
+further processing of it. It respects the form's validation and will only send
 submissions that passed validation and are no longer in a draft state. Multiple
 remote posts can be setup for each individual form, allowing for the submission
 of data to multiple systems at once.
@@ -43,7 +43,7 @@ hook_webform_submission_insert() hook definition.
   filling out the form and submitting it will trigger the remote form
   submission.
 
-* Customize the remore posts settings on on a per-webform basis:
+* Customize the remote posts settings on on a per-webform basis:
   1) Edit the desired webform.
   2) Webform » Remote Posts
   3) Label: It's just an admin-friendly internal name for the remote post
